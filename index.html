@@ -6,7 +6,7 @@
 <title>हमर बिरसा प्रतियोगिता 2025</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-body { font-family: 'Roboto', sans-serif; margin:0; padding:0; background: #f0f2f5; }
+body { font-family: 'Roboto', sans-serif; margin:0; padding:0; background:#f0f2f5; }
 .container { max-width:700px; margin:50px auto; background:#fff; padding:30px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1);}
 h2 { text-align:center; color:#007BFF; }
 form label { display:block; margin:15px 0 5px; font-weight:500; }
@@ -14,7 +14,7 @@ input, select, textarea { width:100%; padding:10px; border:1px solid #ccc; borde
 button { padding:12px 20px; background:#007BFF; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:20px; font-size:16px; }
 button:hover { background:#0056b3; }
 .slip { display:none; text-align:center; margin-top:20px; padding:20px; border-radius:10px; background:#e6ffe6; }
-.slip canvas { margin-top:15px; }
+.qr-container { margin:15px 0; }
 </style>
 </head>
 <body>
@@ -43,7 +43,6 @@ button:hover { background:#0056b3; }
 <div class="slip" id="slip">
   <h3>आपका प्रवेश पत्र</h3>
   <div id="slipDetails"></div>
-  <div id="qrCode"></div>
 </div>
 </div>
 
@@ -53,7 +52,6 @@ const scriptURL = "https://script.google.com/macros/s/AKfycbxz8PwvKYOWkn4nsrk3mk
 const form = document.getElementById('examForm');
 const slip = document.getElementById('slip');
 const slipDetails = document.getElementById('slipDetails');
-const qrCodeDiv = document.getElementById('qrCode');
 
 form.addEventListener('submit', e => {
   e.preventDefault();
@@ -87,7 +85,7 @@ form.addEventListener('submit', e => {
 
       const fileUrl = result.fileUrl;
 
-      // पहले नाम से पता तक details डालो
+      // Slip details — पता तक
       slipDetails.innerHTML = `
         <p><b>नाम:</b> ${payload.name}</p>
         <p><b>शिक्षा:</b> ${payload.education}</p>
@@ -95,18 +93,16 @@ form.addEventListener('submit', e => {
         <p><b>लिंग:</b> ${payload.gender}</p>
         <p><b>मोबाइल:</b> ${payload.mobile}</p>
         <p><b>पता:</b> ${payload.address}</p>
-      `;
-
-      // पता के बाद QR code generate करो
-      QRCode.toCanvas(qrCodeDiv, `Name: ${payload.name}\nTxnID: ${payload.txnid}`, {width:200}, function (error) {
-        if(error) console.error(error);
-      });
-
-      // फिर Transaction ID और Screenshot link
-      slipDetails.innerHTML += `
+        <div class="qr-container" id="qrCode"></div>
         <p><b>Transaction ID:</b> ${payload.txnid}</p>
         <p><b>Payment Screenshot:</b> <a href="${fileUrl}" target="_blank">यहाँ क्लिक करें</a></p>
       `;
+
+      // QR कोड "पता" के बाद डालेगा
+      const qrDiv = document.getElementById('qrCode');
+      QRCode.toCanvas(qrDiv, `Name: ${payload.name}\nTxnID: ${payload.txnid}`, {width:180}, function (error) {
+        if(error) console.error(error);
+      });
 
       form.style.display='none';
       slip.style.display='block';
@@ -116,7 +112,6 @@ form.addEventListener('submit', e => {
       alert("डेटा Google Sheet में नहीं जा सका। लेकिन slip दिख रही है।");
       console.error(err);
     }
-
   };
   reader.readAsDataURL(file);
 });
