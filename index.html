@@ -1,52 +1,9 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>हमर बिरसा प्रतियोगिता 2025</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-body { font-family: 'Roboto', sans-serif; margin:0; padding:0; background: #f0f2f5; }
-.container { max-width:700px; margin:50px auto; background:#fff; padding:30px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1);}
-h2 { text-align:center; color:#007BFF; }
-form label { display:block; margin:15px 0 5px; font-weight:500; }
-input, select, textarea { width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; }
-button { padding:12px 20px; background:#007BFF; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:20px; font-size:16px; }
-button:hover { background:#0056b3; }
-.slip { display:none; text-align:center; margin-top:20px; padding:20px; border-radius:10px; background:#e6ffe6; }
-.slip img { margin-top:15px; width:200px; height:200px; }
-</style>
-</head>
-<body>
-<div class="container">
-<h2>हमर बिरसा सामान्य ज्ञान प्रतियोगिता 2025</h2>
-
-<form id="examForm">
-  <label>नाम:</label><input type="text" name="name" required>
-  <label>शिक्षा:</label><input type="text" name="education">
-  <label>विद्यालय / कॉलेज:</label><input type="text" name="school">
-  <label>लिंग:</label>
-  <select name="gender">
-    <option value="">--Select--</option>
-    <option value="पुरुष">पुरुष</option>
-    <option value="महिला">महिला</option>
-    <option value="अन्य">अन्य</option>
-  </select>
-  <label>Email:</label><input type="email" name="email">
-  <label>मोबाइल:</label><input type="tel" name="mobile" required>
-  <label>पता:</label><textarea name="address"></textarea>
-  <label>Transaction ID:</label><input type="text" name="txnid" required>
-  <label>Payment Screenshot:</label><input type="file" name="screenshot" accept="image/*" required>
-  <button type="submit">सबमिट करें</button>
-</form>
-
 <div class="slip" id="slip">
   <h3>आपका प्रवेश पत्र</h3>
   <div id="slipDetails"></div>
-  <div id="qrCode"></div>
+  <div id="qrCode"></div> <!-- अब QR code slipDetails के बाद, Transaction ID से पहले -->
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbxz8PwvKYOWkn4nsrk3mknu3fOv2bxn4-EJrEFtHsw_Vks3e6KBsvN_-EFlG27VObjENw/exec";
 const form = document.getElementById('examForm');
@@ -86,6 +43,7 @@ form.addEventListener('submit', e => {
 
       const fileUrl = result.fileUrl;
 
+      // slipDetails में नाम, शिक्षा, स्कूल, लिंग, मोबाइल, पता डालो
       slipDetails.innerHTML = `
         <p><b>नाम:</b> ${payload.name}</p>
         <p><b>शिक्षा:</b> ${payload.education}</p>
@@ -93,14 +51,18 @@ form.addEventListener('submit', e => {
         <p><b>लिंग:</b> ${payload.gender}</p>
         <p><b>मोबाइल:</b> ${payload.mobile}</p>
         <p><b>पता:</b> ${payload.address}</p>
-        <p><b>Transaction ID:</b> ${payload.txnid}</p>
-        <p><b>Payment Screenshot:</b> <a href="${fileUrl}" target="_blank">यहाँ क्लिक करें</a></p>
       `;
 
-      // Generate QR code containing student name + txnid
+      // अब QR code generate करो (Transaction ID info के साथ)
       QRCode.toCanvas(qrCodeDiv, `Name: ${payload.name}\nTxnID: ${payload.txnid}`, {width:200}, function (error) {
         if(error) console.error(error);
       });
+
+      // उसके बाद Transaction ID और screenshot
+      slipDetails.innerHTML += `
+        <p><b>Transaction ID:</b> ${payload.txnid}</p>
+        <p><b>Payment Screenshot:</b> <a href="${fileUrl}" target="_blank">यहाँ क्लिक करें</a></p>
+      `;
 
       form.style.display='none';
       slip.style.display='block';
@@ -115,6 +77,3 @@ form.addEventListener('submit', e => {
   reader.readAsDataURL(file);
 });
 </script>
-</div>
-</body>
-</html>
